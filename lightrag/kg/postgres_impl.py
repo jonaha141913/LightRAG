@@ -924,7 +924,7 @@ class PostgreSQLDB:
                     )
                 else:
                     logger.warning(
-                        "Doesn't support this vector index type: {self.vector_index_type}. "
+                        f"Doesn't support this vector index type: {self.vector_index_type}. "
                         "Supported types: HNSW, IVFFLAT"
                     )
             except Exception as e:
@@ -1766,9 +1766,11 @@ class PGKVStorage(BaseKVStorage):
                     "cache_type": v.get(
                         "cache_type", "extract"
                     ),  # Get cache_type from data
-                    "queryparam": json.dumps(v.get("queryparam"))
-                    if v.get("queryparam")
-                    else None,
+                    "queryparam": (
+                        json.dumps(v.get("queryparam"))
+                        if v.get("queryparam")
+                        else None
+                    ),
                 }
 
                 await self.db.execute(upsert_sql, _data)
@@ -1894,7 +1896,9 @@ class PGVectorStorage(BaseVectorStorage):
                 self.db = None
 
     def _upsert_chunks(
-        self, item: dict[str, Any], current_time: datetime.datetime
+        self,
+        item: dict[str, Any],
+        current_time: datetime.datetime,
     ) -> tuple[str, dict[str, Any]]:
         try:
             upsert_sql = SQL_TEMPLATES["upsert_chunk"]
@@ -1919,7 +1923,9 @@ class PGVectorStorage(BaseVectorStorage):
         return upsert_sql, data
 
     def _upsert_entities(
-        self, item: dict[str, Any], current_time: datetime.datetime
+        self,
+        item: dict[str, Any],
+        current_time: datetime.datetime,
     ) -> tuple[str, dict[str, Any]]:
         upsert_sql = SQL_TEMPLATES["upsert_entity"]
         source_id = item["source_id"]
@@ -1942,7 +1948,9 @@ class PGVectorStorage(BaseVectorStorage):
         return upsert_sql, data
 
     def _upsert_relationships(
-        self, item: dict[str, Any], current_time: datetime.datetime
+        self,
+        item: dict[str, Any],
+        current_time: datetime.datetime,
     ) -> tuple[str, dict[str, Any]]:
         upsert_sql = SQL_TEMPLATES["upsert_relationship"]
         source_id = item["source_id"]
@@ -2005,7 +2013,10 @@ class PGVectorStorage(BaseVectorStorage):
 
     #################### query method ###############
     async def query(
-        self, query: str, top_k: int, ids: list[str] | None = None
+        self,
+        query: str,
+        top_k: int,
+        ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         embeddings = await self.embedding_func(
             [query], _priority=5
@@ -3023,7 +3034,8 @@ class PGGraphStorage(BaseGraphStorage):
 
     @staticmethod
     def _format_properties(
-        properties: dict[str, Any], _id: Union[str, None] = None
+        properties: dict[str, Any],
+        _id: Union[str, None] = None,
     ) -> str:
         """
         Convert a dictionary of properties to a string representation that
@@ -3177,7 +3189,9 @@ class PGGraphStorage(BaseGraphStorage):
         return degrees
 
     async def get_edge(
-        self, source_node_id: str, target_node_id: str
+        self,
+        source_node_id: str,
+        target_node_id: str,
     ) -> dict[str, str] | None:
         """Get edge properties between two nodes"""
 
@@ -3240,7 +3254,9 @@ class PGGraphStorage(BaseGraphStorage):
         wait=wait_exponential(multiplier=1, min=4, max=10),
         retry=retry_if_exception_type((PGGraphQueryException,)),
     )
-    async def upsert_node(self, node_id: str, node_data: dict[str, str]) -> None:
+    async def upsert_node(
+        self, node_id: str, node_data: dict[str, str]
+    ) -> None:
         """
         Upsert a node in the Neo4j database.
 
@@ -3281,7 +3297,10 @@ class PGGraphStorage(BaseGraphStorage):
         retry=retry_if_exception_type((PGGraphQueryException,)),
     )
     async def upsert_edge(
-        self, source_node_id: str, target_node_id: str, edge_data: dict[str, str]
+        self,
+        source_node_id: str,
+        target_node_id: str,
+        edge_data: dict[str, str],
     ) -> None:
         """
         Upsert an edge and its properties between two nodes identified by their labels.
@@ -3387,7 +3406,9 @@ class PGGraphStorage(BaseGraphStorage):
                 logger.error(f"[{self.workspace}] Error during edge deletion: {str(e)}")
                 raise
 
-    async def get_nodes_batch(self, node_ids: list[str], batch_size: int = 1000) -> dict[str, dict]:
+    async def get_nodes_batch(
+        self, node_ids: list[str], batch_size: int = 1000
+    ) -> dict[str, dict]:
         """
         Retrieve multiple nodes in one query using UNWIND.
 
@@ -3453,7 +3474,9 @@ class PGGraphStorage(BaseGraphStorage):
 
         return nodes_dict
 
-    async def node_degrees_batch(self, node_ids: list[str], batch_size: int = 500) -> dict[str, int]:
+    async def node_degrees_batch(
+        self, node_ids: list[str], batch_size: int = 500
+    ) -> dict[str, int]:
         """
         Retrieve the degree for multiple nodes in a single query using UNWIND.
         Calculates the total degree by counting distinct relationships.
