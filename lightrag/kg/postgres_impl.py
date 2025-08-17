@@ -3515,10 +3515,10 @@ class PGGraphStorage(BaseGraphStorage):
                     )
                     SELECT v.node_id::text AS node_id,
                            COALESCE(o.out_degree, 0) AS out_degree,
-                           COALESCE(n.in_degree, 0)  AS in_degree
+                           COALESCE(n.in_degree, 0) AS in_degree
                     FROM vids v
                     LEFT JOIN deg_out o ON o.vid = v.vid
-                    LEFT JOIN deg_in  n ON n.vid = v.vid
+                    LEFT JOIN deg_in n ON n.vid = v.vid
                     ORDER BY v.ord;
                 """
 
