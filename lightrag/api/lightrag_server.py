@@ -207,7 +207,7 @@ def check_frontend_build():
             source_dir / "bun.lock",
             source_dir / "vite.config.ts",
             source_dir / "tsconfig.json",
-            source_dir / "tailraid.config.js",
+            source_dir / "tailwind.config.js",
             source_dir / "index.html",
         ]
 
